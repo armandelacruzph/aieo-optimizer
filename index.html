@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIEO - AI Engine Optimization Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #151b3d;
+            --bg-card: #1a2147;
+            --accent-primary: #00ff88;
+            --accent-secondary: #00d4ff;
+            --text-primary: #ffffff;
+            --text-secondary: #8b92b8;
+            --text-dim: #5a617e;
+            --border: #2a3256;
+            --success: #00ff88;
+            --warning: #ffb800;
+            --error: #ff4757;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated gradient background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(0, 255, 136, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(0, 212, 255, 0.08) 0%, transparent 50%);
+            z-index: -1;
+            animation: gradientShift 20s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header */
+        header {
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            background: rgba(10, 14, 39, 0.8);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            font-family: 'Space Mono', monospace;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        nav {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--text-primary);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: var(--bg-primary);
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.3s;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 255, 136, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent-primary);
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        /* Main Screen States */
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dashboard Screen */
+        .dashboard {
+            padding: 48px 0;
+        }
+
+        .dashboard-header {
+            margin-bottom: 48px;
+        }
+
+        .dashboard-header h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #ffffff, var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .dashboard-header p {
+            font-size: 18px;
+            color: var(--text-secondary);
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .action-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .action-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-primary);
+            box-shadow: 0 12px 32px rgba(0, 255, 136, 0.15);
+        }
+
+        .action-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .action-icon {
+            font-size: 36px;
+            margin-bottom: 16px;
+        }
+
+        .action-card h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .action-card p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Recent Projects */
+        .recent-projects {
+            margin-top: 48px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .projects-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .project-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .project-item:hover {
+            border-color: var(--accent-primary);
+            background: rgba(26, 33, 71, 0.8);
+        }
+
+        .project-info h4 {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .project-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+
+        .score-badge {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--success);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 13px;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+        }
+
+        .project-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .icon-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        /* Input Screen */
+        .input-screen {
+            padding: 48px 0;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .input-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 48px;
+        }
+
+        .input-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .input-header h2 {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .input-header p {
+            color: var(--text-secondary);
+        }
+
+        .input-methods {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .method-tab {
+            flex: 1;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .method-tab.active {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
+        }
+
+        textarea.input-field {
+            min-height: 200px;
+            resize: vertical;
+            font-family: 'Space Mono', monospace;
+            font-size: 13px;
+        }
+
+        .brand-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .brand-option {
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--bg-secondary);
+        }
+
+        .brand-option.selected {
+            border-color: var(--accent-primary);
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--accent-primary);
+        }
+
+        .brand-option:hover {
+            border-color: var(--accent-primary);
+        }
+
+        /* Results Screen */
+        .results-screen {
+            padding: 48px 0;
+        }
+
+        .results-header {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .results-title h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .score-display {
+            text-align: right;
+        }
+
+        .score-number {
+            font-size: 48px;
+            font-weight: 700;
+            font-family: 'Space Mono', monospace;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .score-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .comparison-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        .comparison-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .comparison-header h3 {
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .copy-btn {
+            padding: 8px 16px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--accent-primary);
+            border-radius: 8px;
+            color: var(--accent-primary);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(0, 255, 136, 0.2);
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .comparison-box {
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+        }
+
+        .comparison-box h4 {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            color: var(--text-dim);
+        }
+
+        .comparison-box.before h4 {
+            color: var(--warning);
+        }
+
+        .comparison-box.after h4 {
+            color: var(--success);
+        }
+
+        .comparison-content {
+            color: var(--text-primary);
+            line-height: 1.7;
+            font-size: 15px;
+        }
+
+        .char-count {
+            margin-top: 12px;
+            font-size: 12px;
+            color: var(--text-dim);
+            font-family: 'Space Mono', monospace;
+        }
+
+        .improvements-list {
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(0, 255, 136, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-primary);
+        }
+
+        .improvements-list h5 {
+            font-size: 13px;
+            margin-bottom: 8px;
+            color: var(--accent-primary);
+        }
+
+        .improvements-list ul {
+            list-style: none;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .improvements-list li {
+            padding: 4px 0;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .improvements-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--accent-primary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .action-buttons button {
+            flex: 1;
+        }
+
+        /* Processing Animation */
+        .processing-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 14, 39, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .processing-overlay.active {
+            display: flex;
+        }
+
+        .processing-content {
+            text-align: center;
+        }
+
+        .spinner {
+            width: 64px;
+            height: 64px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 24px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .processing-content h3 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .processing-content p {
+            color: var(--text-secondary);
+        }
+
+        .processing-steps {
+            margin-top: 24px;
+            text-align: left;
+            max-width: 300px;
+        }
+
+        .processing-step {
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            background: var(--bg-card);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            opacity: 0.3;
+            transition: all 0.3s;
+        }
+
+        .processing-step.active {
+            opacity: 1;
+            background: rgba(0, 255, 136, 0.1);
+            border-left: 3px solid var(--accent-primary);
+        }
+
+        .step-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .processing-step.active .step-icon {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .results-header {
+                flex-direction: column;
+                gap: 24px;
+                text-align: center;
+            }
+
+            .score-display {
+                text-align: center;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .dashboard-header h1 {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">AIEO</div>
+                <nav>
+                    <a href="#" onclick="showScreen('dashboard')">Dashboard</a>
+                    <a href="#">Projects</a>
+                    <a href="#">Analytics</a>
+                    <button class="btn-primary" onclick="showScreen('input')">+ New Optimization</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboard-screen" class="screen active">
+        <div class="container">
+            <div class="dashboard">
+                <div class="dashboard-header">
+                    <h1>Welcome back 👋</h1>
+                    <p>Your AI optimization workspace for Amazon listings</p>
+                </div>
+
+                <div class="quick-actions">
+                    <div class="action-card" onclick="showScreen('input'); setOptimizationType('single')">
+                        <div class="action-icon">🚀</div>
+                        <h3>Single Product</h3>
+                        <p>Optimize one product at a time</p>
+                    </div>
+                    <div class="action-card" onclick="showScreen('input'); setOptimizationType('bulk')">
+                        <div class="action-icon">📊</div>
+                        <h3>Bulk Upload</h3>
+                        <p>Optimize 10-100+ products at once</p>
+                    </div>
+                    <div class="action-card" onclick="showScreen('brands')">
+                        <div class="action-icon">⚙️</div>
+                        <h3>Manage Brands</h3>
+                        <p>Add or edit client brand SOPs</p>
+                    </div>
+                    <div class="action-card">
+                        <div class="action-icon">📈</div>
+                        <h3>Analytics</h3>
+                        <p>Track performance and improvements</p>
+                    </div>
+                </div>
+
+                <div class="recent-projects">
+                    <div class="section-title">
+                        <span>📁</span> Recent Optimizations
+                    </div>
+                    <div class="projects-grid">
+                        <div class="project-item" onclick="showScreen('results')">
+                            <div class="project-info">
+                                <h4>Alpinestars SX-1 V2 Knee Guards</h4>
+                                <div class="project-meta">
+                                    <span>📅 2 hours ago</span>
+                                    <span class="score-badge">AIEO Score: 92/100</span>
+                                </div>
+                            </div>
+                            <div class="project-actions">
+                                <button class="icon-btn">👁️</button>
+                                <button class="icon-btn">📥</button>
+                                <button class="icon-btn">⋯</button>
+                            </div>
+                        </div>
+                        <div class="project-item">
+                            <div class="project-info">
+                                <h4>Alpinestars Tech 3 Motocross Boots</h4>
+                                <div class="project-meta">
+                                    <span>📅 1 day ago</span>
+                                    <span class="score-badge">AIEO Score: 88/100</span>
+                                </div>
+                            </div>
+                            <div class="project-actions">
+                                <button class="icon-btn">👁️</button>
+                                <button class="icon-btn">📥</button>
+                                <button class="icon-btn">⋯</button>
+                            </div>
+                        </div>
+                        <div class="project-item">
+                            <div class="project-info">
+                                <h4>Alpinestars Radar Gloves</h4>
+                                <div class="project-meta">
+                                    <span>📅 3 days ago</span>
+                                    <span class="score-badge">AIEO Score: 85/100</span>
+                                </div>
+                            </div>
+                            <div class="project-actions">
+                                <button class="icon-btn">👁️</button>
+                                <button class="icon-btn">📥</button>
+                                <button class="icon-btn">⋯</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Screen -->
+    <div id="input-screen" class="screen">
+        <div class="container">
+            <div class="input-screen">
+                <div class="input-card">
+                    <div class="input-header">
+                        <h2 id="input-title">Start Your AIEO Optimization</h2>
+                        <p id="input-subtitle">Enter your product details to generate AI-optimized content</p>
+                    </div>
+
+                    <!-- Optimization Type Indicator -->
+                    <div id="optimization-type-badge" style="text-align: center; margin-bottom: 24px;">
+                        <span style="background: rgba(0, 255, 136, 0.1); color: var(--accent-primary); padding: 8px 20px; border-radius: 20px; font-weight: 600; font-size: 14px;">
+                            <span id="type-text">Single Product</span> Mode
+                        </span>
+                    </div>
+
+                    <div class="input-methods">
+                        <button class="method-tab active" onclick="switchTab('url')">
+                            🔗 Amazon URL
+                        </button>
+                        <button class="method-tab" onclick="switchTab('paste')">
+                            📝 Paste Listing
+                        </button>
+                        <button class="method-tab" onclick="switchTab('upload')">
+                            📤 Upload File
+                        </button>
+                    </div>
+
+                    <div id="url-input" class="input-content">
+                        <div class="input-group">
+                            <label id="url-label">Amazon Product URL or ASIN</label>
+                            <input 
+                                type="text" 
+                                class="input-field" 
+                                id="amazon-url-field"
+                                placeholder="https://www.amazon.com/dp/B08CSYPS6X or B08CSYPS6X"
+                                value="https://www.amazon.com/Alpinestars-Protector-Protection-Small-Medium/dp/B08CSYPS6X/"
+                            >
+                            <p style="font-size: 12px; color: var(--text-dim); margin-top: 8px;">
+                                💡 For bulk mode: Enter one URL per line or upload a CSV file
+                            </p>
+                        </div>
+                    </div>
+
+                    <div id="paste-input" class="input-content" style="display: none;">
+                        <div class="input-group">
+                            <label>Current Title</label>
+                            <input type="text" class="input-field" placeholder="Paste your current product title">
+                        </div>
+                        <div class="input-group">
+                            <label>Current Bullet Points</label>
+                            <textarea class="input-field" placeholder="Paste all 5 bullet points here..."></textarea>
+                        </div>
+                    </div>
+
+                    <div id="upload-input" class="input-content" style="display: none;">
+                        <div class="input-group">
+                            <label>Upload Product Data</label>
+                            <div style="border: 2px dashed var(--border); border-radius: 12px; padding: 48px; text-align: center; background: var(--bg-secondary);">
+                                <div style="font-size: 48px; margin-bottom: 16px;">📄</div>
+                                <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                                    Drag and drop your file here or click to browse
+                                </p>
+                                <button class="btn-secondary">Choose File</button>
+                                <p style="font-size: 12px; color: var(--text-dim); margin-top: 12px;">
+                                    Supports: CSV, Excel (.xlsx), or Amazon flatfile
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Select Client Brand SOP</label>
+                        <div class="brand-selector">
+                            <div class="brand-option selected">
+                                <div>🏍️</div>
+                                <div style="margin-top: 8px; font-weight: 600; font-size: 13px;">Alpinestars</div>
+                            </div>
+                            <div class="brand-option">
+                                <div>👕</div>
+                                <div style="margin-top: 8px; font-weight: 600; font-size: 13px;">Nike</div>
+                            </div>
+                            <div class="brand-option">
+                                <div>🎮</div>
+                                <div style="margin-top: 8px; font-weight: 600; font-size: 13px;">Logitech</div>
+                            </div>
+                            <div class="brand-option">
+                                <div>⚙️</div>
+                                <div style="margin-top: 8px; font-weight: 600; font-size: 13px;">Generic</div>
+                            </div>
+                            <div class="brand-option" onclick="showScreen('brands')">
+                                <div>➕</div>
+                                <div style="margin-top: 8px; font-weight: 600; font-size: 13px;">Add New</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn-secondary" onclick="showScreen('dashboard')">Cancel</button>
+                        <button class="btn-primary" onclick="startOptimization()">
+                            <span id="optimize-btn-text">🚀 Optimize with AIEO</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Brand Management Screen -->
+    <div id="brands-screen" class="screen">
+        <div class="container">
+            <div class="input-screen">
+                <div class="input-card" style="max-width: 1000px;">
+                    <div class="input-header">
+                        <h2>Brand SOP Management</h2>
+                        <p>Add or manage your client brand guidelines and SOPs</p>
+                    </div>
+
+                    <!-- Existing Brands List -->
+                    <div style="margin-bottom: 32px;">
+                        <h3 style="font-size: 18px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                            📁 Your Client Brands
+                        </h3>
+                        <div style="display: grid; gap: 12px;">
+                            <div class="project-item">
+                                <div class="project-info">
+                                    <h4>🏍️ Alpinestars</h4>
+                                    <div class="project-meta">
+                                        <span>Last updated: 2 days ago</span>
+                                        <span style="color: var(--success);">✓ Active</span>
+                                    </div>
+                                </div>
+                                <div class="project-actions">
+                                    <button class="icon-btn">✏️</button>
+                                    <button class="icon-btn">📥</button>
+                                    <button class="icon-btn">🗑️</button>
+                                </div>
+                            </div>
+                            <div class="project-item">
+                                <div class="project-info">
+                                    <h4>👕 Nike Sports Apparel</h4>
+                                    <div class="project-meta">
+                                        <span>Last updated: 1 week ago</span>
+                                        <span style="color: var(--success);">✓ Active</span>
+                                    </div>
+                                </div>
+                                <div class="project-actions">
+                                    <button class="icon-btn">✏️</button>
+                                    <button class="icon-btn">📥</button>
+                                    <button class="icon-btn">🗑️</button>
+                                </div>
+                            </div>
+                            <div class="project-item">
+                                <div class="project-info">
+                                    <h4>🎮 Logitech Gaming</h4>
+                                    <div class="project-meta">
+                                        <span>Last updated: 3 days ago</span>
+                                        <span style="color: var(--success);">✓ Active</span>
+                                    </div>
+                                </div>
+                                <div class="project-actions">
+                                    <button class="icon-btn">✏️</button>
+                                    <button class="icon-btn">📥</button>
+                                    <button class="icon-btn">🗑️</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add New Brand Form -->
+                    <div style="border-top: 1px solid var(--border); padding-top: 32px;">
+                        <h3 style="font-size: 18px; margin-bottom: 24px; display: flex; align-items: center; gap: 8px;">
+                            ➕ Add New Client Brand
+                        </h3>
+
+                        <div class="input-group">
+                            <label>Brand Name</label>
+                            <input 
+                                type="text" 
+                                class="input-field" 
+                                placeholder="e.g., Alpinestars, Nike, Your Client Name"
+                            >
+                        </div>
+
+                        <div class="input-group">
+                            <label>Brand Category/Industry</label>
+                            <select class="input-field" style="cursor: pointer;">
+                                <option>Select category...</option>
+                                <option>Sports & Outdoors</option>
+                                <option>Automotive & Powersports</option>
+                                <option>Electronics</option>
+                                <option>Apparel & Accessories</option>
+                                <option>Home & Kitchen</option>
+                                <option>Beauty & Personal Care</option>
+                                <option>Toys & Games</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Upload Brand SOP Document</label>
+                            <div style="border: 2px dashed var(--border); border-radius: 12px; padding: 32px; text-align: center; background: var(--bg-secondary); cursor: pointer;" onclick="document.getElementById('sop-file').click();">
+                                <input type="file" id="sop-file" style="display: none;" accept=".doc,.docx,.pdf,.txt">
+                                <div style="font-size: 36px; margin-bottom: 12px;">📄</div>
+                                <p style="color: var(--text-secondary); margin-bottom: 12px;">
+                                    Click to upload SOP document
+                                </p>
+                                <p style="font-size: 12px; color: var(--text-dim);">
+                                    Supports: .docx, .pdf, .txt (Max 5MB)
+                                </p>
+                            </div>
+                            <p style="font-size: 12px; color: var(--text-dim); margin-top: 8px; line-height: 1.6;">
+                                💡 <strong>What to include:</strong> Title format, bullet point structure, character limits, 
+                                required fields, brand voice guidelines, certification requirements, and any Amazon-specific rules.
+                            </p>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Or Paste SOP Content Directly</label>
+                            <textarea 
+                                class="input-field" 
+                                style="min-height: 300px; font-family: 'Space Mono', monospace; font-size: 13px;"
+                                placeholder="Paste your brand's Amazon listing SOP here...
+
+Example format:
+- Title must start with brand name
+- Exactly 5 bullets, max 250 characters each
+- CE certification must be in bullet 5
+- Use specific terminology: 'motocross' not 'motorcycle racing'
+- etc."
+                            ></textarea>
+                        </div>
+
+                        <div class="input-group">
+                            <label>
+                                <input type="checkbox" style="margin-right: 8px; width: auto;">
+                                Enable AIEO enhancements for this brand
+                            </label>
+                            <p style="font-size: 12px; color: var(--text-dim); margin-top: 4px; margin-left: 24px;">
+                                Add quantifiable specs, use cases, and semantic keywords while respecting brand SOP
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons" style="margin-top: 32px;">
+                        <button class="btn-secondary" onclick="showScreen('dashboard')">Cancel</button>
+                        <button class="btn-primary" onclick="saveBrand()">💾 Save Brand SOP</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="results-screen" class="screen">
+        <div class="container">
+            <div class="results-screen">
+                <div class="results-header">
+                    <div class="results-title">
+                        <h2>Alpinestars SX-1 V2 Knee Guards</h2>
+                        <p style="color: var(--text-secondary);">Optimization completed • 47 improvements applied</p>
+                    </div>
+                    <div class="score-display">
+                        <div class="score-number">92</div>
+                        <div class="score-label">AIEO Score</div>
+                    </div>
+                </div>
+
+                <!-- Title Comparison -->
+                <div class="comparison-section">
+                    <div class="comparison-header">
+                        <h3>📝 Product Title</h3>
+                        <button class="copy-btn">Copy Optimized</button>
+                    </div>
+                    <div class="comparison-grid">
+                        <div class="comparison-box before">
+                            <h4>Before</h4>
+                            <div class="comparison-content">
+                                Alpinestars SX-1 V2 Adult Knee Protector, Lightweight Off-Road Knee Protection, CE-Certified
+                            </div>
+                            <div class="char-count">128 characters</div>
+                        </div>
+                        <div class="comparison-box after">
+                            <h4>After (AIEO Optimized)</h4>
+                            <div class="comparison-content">
+                                Alpinestars SX-1 V2 Knee Guards Motocross Enduro Trail Riding CE-Certified Articulated Lightweight 290g (Black, Small-Medium)
+                            </div>
+                            <div class="char-count">145 characters • +4 keywords • +2 specs</div>
+                        </div>
+                    </div>
+                    <div class="improvements-list">
+                        <h5>✨ AIEO Improvements Made:</h5>
+                        <ul>
+                            <li>Added exact weight specification (290g)</li>
+                            <li>Inserted specific use cases (Motocross, Enduro, Trail Riding)</li>
+                            <li>Added "Articulated" technical feature</li>
+                            <li>Included size variant in parentheses</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Bullet 1 Comparison -->
+                <div class="comparison-section">
+                    <div class="comparison-header">
+                        <h3>🔹 Bullet Point 1</h3>
+                        <button class="copy-btn">Copy Optimized</button>
+                    </div>
+                    <div class="comparison-grid">
+                        <div class="comparison-box before">
+                            <h4>Before</h4>
+                            <div class="comparison-content">
+                                ADVANCED KNEE COVERAGE: Designed with a robust impact shield structure that helps protect the knee from trail debris and off road obstacles. Provides dependable coverage for motocross, enduro, and trail riding conditions with stable front impact support.
+                            </div>
+                            <div class="char-count">248 characters</div>
+                        </div>
+                        <div class="comparison-box after">
+                            <h4>After (AIEO Optimized)</h4>
+                            <div class="comparison-content">
+                                REINFORCED POLYMER IMPACT SHELL: Multi-layer construction with rigid outer shell and impact-absorbing foam backing protects kneecap from rock strikes, trail debris, and crash impacts. Weighs only 290 grams per knee guard for all-day comfort during 6+ hour enduro and trail rides.
+                            </div>
+                            <div class="char-count">249 characters</div>
+                        </div>
+                    </div>
+                    <div class="improvements-list">
+                        <h5>✨ AIEO Improvements Made:</h5>
+                        <ul>
+                            <li>Added quantifiable weight spec (290 grams)</li>
+                            <li>Specific threat scenarios (rock strikes, crash impacts)</li>
+                            <li>Use case quantification (6+ hour rides)</li>
+                            <li>Material specificity (polymer, foam backing)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Show all bullets toggle -->
+                <div style="text-align: center; margin: 24px 0;">
+                    <button class="btn-secondary" onclick="toggleAllBullets()">
+                        <span id="toggle-bullets-text">📋 Show All 5 Bullets</span>
+                    </button>
+                </div>
+
+                <div id="remaining-bullets" style="display: none;">
+                    <!-- Bullet 2 -->
+                    <div class="comparison-section">
+                        <div class="comparison-header">
+                            <h3>🔹 Bullet Point 2</h3>
+                            <button class="copy-btn">Copy Optimized</button>
+                        </div>
+                        <div class="comparison-grid">
+                            <div class="comparison-box before">
+                                <h4>Before</h4>
+                                <div class="comparison-content">
+                                    STRONG DURABLE MATERIALS: Built using reinforced polymer shells combined with flexible panel zones to support comfort and strength. The layered design delivers reliable impact performance while staying lightweight for long riding sessions.
+                                </div>
+                            </div>
+                            <div class="comparison-box after">
+                                <h4>After (AIEO Optimized)</h4>
+                                <div class="comparison-content">
+                                    ARTICULATED HINGE DESIGN: Multi-panel construction flexes naturally with leg movement during standing, seated, and aggressive cornering positions. Fits calf circumferences 12-17 inches and thighs 16-23 inches, accommodating riders 5'4" to 6'2" without restricting motion on technical terrain.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bullet 3 -->
+                    <div class="comparison-section">
+                        <div class="comparison-header">
+                            <h3>🔹 Bullet Point 3</h3>
+                            <button class="copy-btn">Copy Optimized</button>
+                        </div>
+                        <div class="comparison-grid">
+                            <div class="comparison-box before">
+                                <h4>Before</h4>
+                                <div class="comparison-content">
+                                    ERGONOMIC JOINT FLEX: Articulated panels follow the natural movement of the leg for smooth bending and extension. Helps maintain comfort during seated or standing positions.
+                                </div>
+                            </div>
+                            <div class="comparison-box after">
+                                <h4>After (AIEO Optimized)</h4>
+                                <div class="comparison-content">
+                                    DUAL-STRAP SECURE CLOSURE: Upper and lower adjustable straps with quick-release buckles lock guards in position through 3-foot jumps, whoops, and rock gardens without rotation or slipping. Works over or under MX pants and fits comfortably with knee braces if needed for post-injury support.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bullet 4 -->
+                    <div class="comparison-section">
+                        <div class="comparison-header">
+                            <h3>🔹 Bullet Point 4</h3>
+                            <button class="copy-btn">Copy Optimized</button>
+                        </div>
+                        <div class="comparison-grid">
+                            <div class="comparison-box before">
+                                <h4>Before</h4>
+                                <div class="comparison-content">
+                                    ADJUSTABLE SECURE STRAPS: Features adjustable closure systems that allow riders to fine tune fit around the upper and lower leg.
+                                </div>
+                            </div>
+                            <div class="comparison-box after">
+                                <h4>After (AIEO Optimized)</h4>
+                                <div class="comparison-content">
+                                    VERSATILE OFF-ROAD PROTECTION: Engineered for motocross tracks, enduro racing, hard enduro rock crawling, desert riding, dual-sport adventures, and trail riding. Ventilated shell design prevents heat buildup during amateur racing, practice days, GNCC events, Hare Scrambles, and weekend recreational rides.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bullet 5 -->
+                    <div class="comparison-section">
+                        <div class="comparison-header">
+                            <h3>🔹 Bullet Point 5 (Safety Certification)</h3>
+                            <button class="copy-btn">Copy Optimized</button>
+                        </div>
+                        <div class="comparison-grid">
+                            <div class="comparison-box before">
+                                <h4>Before</h4>
+                                <div class="comparison-content">
+                                    RIDING SAFETY SUPPORT: Engineered to meet key off road performance requirements with a design that helps distribute impact forces.
+                                </div>
+                            </div>
+                            <div class="comparison-box after">
+                                <h4>After (AIEO Optimized)</h4>
+                                <div class="comparison-content">
+                                    CE-CERTIFIED SAFETY STANDARD: Meets European EN1621-1 certification for impact protection in motorcycle and off-road riding. Impact-resistant shell distributes crash forces across knee area, providing reliable protection during training, racing, and recreational trail use on dirt bikes, ATVs, and adventure motorcycles.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 32px; margin-bottom: 24px;">
+                    <h3 style="font-size: 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+                        📤 Export Options
+                    </h3>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                        <button class="btn-secondary" style="justify-content: center; display: flex; align-items: center; gap: 8px;">
+                            <span>📋</span> Copy All Text
+                        </button>
+                        <button class="btn-secondary" style="justify-content: center; display: flex; align-items: center; gap: 8px;">
+                            <span>📥</span> Download Flatfile (.xlsx)
+                        </button>
+                        <button class="btn-secondary" style="justify-content: center; display: flex; align-items: center; gap: 8px;">
+                            <span>📄</span> Export PDF Report
+                        </button>
+                        <button class="btn-secondary" style="justify-content: center; display: flex; align-items: center; gap: 8px;">
+                            <span>✉️</span> Email to Client
+                        </button>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-secondary" onclick="showScreen('dashboard')">← Back to Dashboard</button>
+                    <button class="btn-primary" onclick="showScreen('input')">✨ Optimize Another Product</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Processing Overlay -->
+    <div id="processing-overlay" class="processing-overlay">
+        <div class="processing-content">
+            <div class="spinner"></div>
+            <h3>Optimizing with AIEO...</h3>
+            <p>Analyzing your product and applying AI optimization</p>
+            
+            <div class="processing-steps">
+                <div class="processing-step active">
+                    <div class="step-icon">1</div>
+                    <div>Extracting product data</div>
+                </div>
+                <div class="processing-step">
+                    <div class="step-icon">2</div>
+                    <div>Analyzing with AI engine</div>
+                </div>
+                <div class="processing-step">
+                    <div class="step-icon">3</div>
+                    <div>Applying AIEO principles</div>
+                </div>
+                <div class="processing-step">
+                    <div class="step-icon">4</div>
+                    <div>Validating compliance</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentOptimizationType = 'single';
+
+        function showScreen(screenName) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Show selected screen
+            document.getElementById(screenName + '-screen').classList.add('active');
+        }
+
+        function setOptimizationType(type) {
+            currentOptimizationType = type;
+            
+            // Update UI based on type
+            const typeText = document.getElementById('type-text');
+            const inputTitle = document.getElementById('input-title');
+            const urlLabel = document.getElementById('url-label');
+            const urlField = document.getElementById('amazon-url-field');
+            const optimizeBtn = document.getElementById('optimize-btn-text');
+            
+            if (type === 'bulk') {
+                typeText.textContent = 'Bulk Upload';
+                inputTitle.textContent = 'Bulk Product Optimization';
+                urlLabel.textContent = 'Amazon Product URLs (One per line)';
+                urlField.placeholder = 'https://www.amazon.com/dp/B08CSYPS6X\nhttps://www.amazon.com/dp/B08CSYPS7Y\nhttps://www.amazon.com/dp/B08CSYPS8Z';
+                urlField.style.minHeight = '150px';
+                optimizeBtn.innerHTML = '🚀 Optimize ' + (urlField.value.split('\n').length || '10+') + ' Products';
+            } else {
+                typeText.textContent = 'Single Product';
+                inputTitle.textContent = 'Start Your AIEO Optimization';
+                urlLabel.textContent = 'Amazon Product URL or ASIN';
+                urlField.placeholder = 'https://www.amazon.com/dp/B08CSYPS6X or B08CSYPS6X';
+                urlField.style.minHeight = 'auto';
+                optimizeBtn.innerHTML = '🚀 Optimize with AIEO';
+            }
+        }
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.method-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Hide all input contents
+            document.querySelectorAll('.input-content').forEach(content => {
+                content.style.display = 'none';
+            });
+
+            // Show selected input
+            document.getElementById(tabName + '-input').style.display = 'block';
+        }
+
+        function startOptimization() {
+            // Show processing overlay
+            document.getElementById('processing-overlay').classList.add('active');
+
+            // Update processing text based on type
+            const processingTitle = document.querySelector('.processing-content h3');
+            if (currentOptimizationType === 'bulk') {
+                processingTitle.textContent = 'Optimizing Multiple Products...';
+            } else {
+                processingTitle.textContent = 'Optimizing with AIEO...';
+            }
+
+            // Simulate processing steps
+            setTimeout(() => {
+                document.querySelectorAll('.processing-step')[1].classList.add('active');
+            }, 1000);
+
+            setTimeout(() => {
+                document.querySelectorAll('.processing-step')[2].classList.add('active');
+            }, 2000);
+
+            setTimeout(() => {
+                document.querySelectorAll('.processing-step')[3].classList.add('active');
+            }, 3000);
+
+            setTimeout(() => {
+                // Hide overlay and show results
+                document.getElementById('processing-overlay').classList.remove('active');
+                
+                // Reset processing steps for next time
+                document.querySelectorAll('.processing-step').forEach((step, index) => {
+                    if (index > 0) step.classList.remove('active');
+                });
+                
+                showScreen('results');
+            }, 4000);
+        }
+
+        function saveBrand() {
+            // Simulate saving
+            alert('Brand SOP saved successfully! ✅\n\nYou can now select this brand when optimizing products.');
+            showScreen('dashboard');
+        }
+
+        function toggleAllBullets() {
+            const remainingBullets = document.getElementById('remaining-bullets');
+            const toggleText = document.getElementById('toggle-bullets-text');
+            
+            if (remainingBullets.style.display === 'none') {
+                remainingBullets.style.display = 'block';
+                toggleText.textContent = '📋 Hide Extra Bullets';
+            } else {
+                remainingBullets.style.display = 'none';
+                toggleText.textContent = '📋 Show All 5 Bullets';
+            }
+        }
+
+        // Brand selector interaction
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.brand-option')) {
+                const allOptions = document.querySelectorAll('.brand-option');
+                allOptions.forEach(opt => opt.classList.remove('selected'));
+                
+                const clicked = e.target.closest('.brand-option');
+                // Don't select the "Add New" option
+                if (!clicked.textContent.includes('Add New')) {
+                    clicked.classList.add('selected');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

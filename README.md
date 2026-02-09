@@ -1,0 +1,2 @@
+# aieo-optimizer
+AI SEO
